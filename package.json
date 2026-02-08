@@ -7,12 +7,23 @@
     "claude-norns-statusline": "./dist/index.js"
   },
   "main": "./dist/index.js",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch"
+    "dev": "tsup --watch",
+    "prepublishOnly": "npm run build"
   },
-  "keywords": ["claude", "claude-code", "statusline", "terminal", "norse", "nerd-font"],
+  "keywords": ["claude", "claude-code", "statusline", "terminal", "norse", "nerd-font", "themes", "oauth"],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danjuls/claude-norns-statusline.git"
+  },
+  "homepage": "https://github.com/danjuls/claude-norns-statusline",
+  "author": "Daniel Andreasson",
   "engines": {
     "node": ">=18"
   },
