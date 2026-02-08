@@ -12,11 +12,45 @@ Zero runtime dependencies. Single bundled file. Under 70ms render time.
  󰊛 Opus 4.6  main  ██████░░░░ 62%  $1.23 · 45K tok  S:42% 3h12m · W:67%
 ```
 
+## TL;DR
+
+**Terminal:**
+
+```bash
+# 1. Install
+npm install -g claude-norns-statusline@latest
+
+# 2. Install slash commands
+claude-norns-statusline --install-commands
+```
+
+**~/.claude/settings.json:**
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "claude-norns-statusline"
+  }
+}
+```
+
+**Inside Claude Code** — customize on the fly:
+
+```
+/norns:theme bifrost                                → switch theme instantly
+/norns:style capsule                                → pill-style separators
+/norns:show metrics directory                       → enable extra segments
+/norns:lines model,git,directory | context,session  → two-line layout
+```
+
 ## Features
 
 - **6 Norse themes** — Yggdrasil, Bifrost, Ragnarok, Valhalla, Mist, Jotunheim
 - **3 rendering styles** — Powerline arrows, minimal pipes, capsule pills
 - **12 segments** — model, git, context, session, usage, block, daily, metrics, version, tmux, directory, custom
+- **Multi-line layout** — spread segments across 1-4 rows
+- **Slash commands** — `/norns:theme bifrost` to change settings live, no restart needed
 - **Smart truncation** — priority-based segment dropping when terminal is narrow
 - **Nerd Font + text fallback** — works with or without patched fonts
 - **5 progress bar styles** — block `█░`, classic `━─`, shade `▓░`, dot `●○`, pipe `┃┊`
@@ -24,14 +58,13 @@ Zero runtime dependencies. Single bundled file. Under 70ms render time.
 - **OAuth usage tracking** — session and weekly API usage (auto-discovers credentials)
 - **File-based caching** — configurable TTLs for git, OAuth, and transcript data
 - **Truecolor support** — 24-bit hex colors with automatic fallback
-- **Debug mode** — `--debug-stdin` dumps raw Claude Code data for troubleshooting
 
 ## Installation
 
 ### npm (recommended)
 
 ```bash
-npm install -g claude-norns-statusline
+npm install -g claude-norns-statusline@latest
 ```
 
 ### npx (no install)
@@ -75,6 +108,88 @@ Or if installed globally / from source:
 ```
 
 Restart Claude Code and the statusline should appear at the bottom of your terminal.
+
+## Slash Commands
+
+Control your statusline from inside Claude Code — no manual config editing, no restarts.
+
+### Install slash commands
+
+```bash
+npx claude-norns-statusline@latest --install-commands
+```
+
+This copies command files to `~/.claude/commands/norns/`. They're available immediately.
+
+### Available commands
+
+| Command | Example | What it does |
+|---------|---------|--------------|
+| `/norns:theme` | `/norns:theme bifrost` | Switch theme |
+| `/norns:style` | `/norns:style capsule` | Switch rendering style |
+| `/norns:show` | `/norns:show metrics directory` | Enable one or more segments |
+| `/norns:hide` | `/norns:hide git usage` | Disable one or more segments |
+| `/norns:lines` | `/norns:lines 2` | Set number of statusline rows |
+| `/norns:config` | `/norns:config` | Show current configuration |
+| `/norns:reset` | `/norns:reset` | Reset everything to defaults |
+
+All commands edit `~/.config/claude-norns-statusline/config.json`. Changes apply instantly on the next statusline refresh (~150ms while Claude is active).
+
+### Example workflow
+
+```
+You:  /norns:theme ragnarok
+      → "Switched theme to ragnarok"           (statusline updates immediately)
+
+You:  /norns:show metrics directory
+      → "Enabled: metrics, directory"           (new segments appear)
+
+You:  /norns:lines 2
+      → "Set to 2 lines"                        (segments split across 2 rows)
+
+You:  /norns:style capsule
+      → "Switched style to capsule"             (rounded pill separators)
+
+You:  /norns:reset
+      → "Reset to defaults"                     (back to yggdrasil/powerline/1 line)
+```
+
+## Multi-line Layout
+
+Spread segments across multiple rows instead of cramming everything on one line.
+
+### Quick — auto-split
+
+```bash
+# Via CLI flag
+npx claude-norns-statusline@latest --lines=2
+
+# Via slash command (inside Claude Code)
+/norns:lines 2
+```
+
+Segments auto-distribute by priority: highest-priority segments on line 1, rest on line 2.
+
+### Explicit — choose what goes where
+
+In `~/.config/claude-norns-statusline/config.json`:
+
+```json
+{
+  "lines": [
+    ["model", "git", "context"],
+    ["session", "usage", "metrics"]
+  ]
+}
+```
+
+Or via slash command:
+
+```
+/norns:lines model,git,context | session,usage,metrics
+```
+
+Any enabled segments not assigned to a line get appended to the last line.
 
 ## Themes
 
@@ -154,19 +269,23 @@ Higher priority segments are kept when the terminal is too narrow — lower prio
 
 ### Enabling/disabling segments
 
+Via slash commands (recommended):
+
+```
+/norns:show metrics directory     Enable segments
+/norns:hide git usage             Disable segments
+```
+
 Via CLI flags:
 
 ```bash
-# Disable a segment
---no-git
---no-usage
-
-# Enable a disabled-by-default segment
---metrics=true
---directory=true
+--no-git          # Disable
+--no-usage        # Disable
+--metrics=true    # Enable
+--directory=true  # Enable
 ```
 
-Via config file:
+Via config file (`~/.config/claude-norns-statusline/config.json`):
 
 ```json
 {
@@ -185,9 +304,8 @@ Settings are resolved in this order (highest priority first):
 1. **CLI flags** — `--theme=ragnarok --style=capsule --no-git`
 2. **Environment variables** — `NORNS_THEME`, `NORNS_STYLE`, `NORNS_CHARSET`, `NORNS_BAR_STYLE`, `NORNS_SHIMMER`, `NORNS_OAUTH`
 3. **Project config** — `.claude-norns-statusline.json` in current directory
-4. **User config** — `~/.claude/claude-norns-statusline.json`
-5. **XDG config** — `$XDG_CONFIG_HOME/claude-norns-statusline/config.json`
-6. **Defaults**
+4. **User config** — `~/.config/claude-norns-statusline/config.json` (edited by slash commands)
+5. **Defaults**
 
 ### Example config file
 
@@ -198,6 +316,7 @@ Settings are resolved in this order (highest priority first):
   "charset": "nerd",
   "barStyle": "block",
   "barWidth": 10,
+  "lines": 2,
   "oauth": true,
   "segments": {
     "model": { "enabled": true, "priority": 100 },
@@ -219,11 +338,13 @@ Settings are resolved in this order (highest priority first):
 | `--style=NAME` | `powerline`, `minimal`, or `capsule` | `powerline` |
 | `--charset=NAME` | `nerd` or `text` | `nerd` |
 | `--bar-style=NAME` | `block`, `classic`, `shade`, `dot`, or `pipe` | `block` |
+| `--lines=N` | Number of statusline rows (1-4) | `1` |
 | `--shimmer` | Rainbow animation while Claude is active | `false` |
 | `--oauth=false` | Disable OAuth usage fetching | `true` |
 | `--no-SEGMENT` | Disable a segment | — |
 | `--SEGMENT=true` | Enable a segment | — |
 | `--show-themes` | Preview all themes and exit | — |
+| `--install-commands` | Install slash commands to `~/.claude/commands/norns/` | — |
 | `--debug-stdin` | Dump stdin JSON to `~/.cache/claude-norns-statusline/` | — |
 
 ## Shimmer Effect
@@ -252,6 +373,37 @@ The usage segment shows your 5-hour session and 7-day rolling API usage percenta
 3. **`CLAUDE_CODE_OAUTH_TOKEN` env var** — manual override
 
 If you're logged into Claude Code normally, it should work automatically. Disable with `--oauth=false` if you don't need it or are using an API key.
+
+## Testing Locally
+
+Test the statusline outside of Claude Code by piping JSON to stdin:
+
+```bash
+# Basic — just model info
+echo '{"model":{"id":"claude-opus-4-6","display_name":"Opus 4.6"}}' | npx claude-norns-statusline --oauth=false
+
+# Full data — model, cost, context window
+echo '{"model":{"id":"claude-opus-4-6","display_name":"Opus 4.6"},"cost":{"total_cost_usd":1.23},"context_window":{"used_percentage":62,"total_input_tokens":35000,"total_output_tokens":8000}}' | npx claude-norns-statusline --oauth=false
+
+# Try different themes
+echo '{}' | npx claude-norns-statusline --theme=ragnarok --oauth=false
+echo '{}' | npx claude-norns-statusline --theme=bifrost --style=capsule --oauth=false
+
+# Multi-line
+echo '{"model":{"id":"claude-opus-4-6","display_name":"Opus 4.6"},"cost":{"total_cost_usd":0.42},"context_window":{"used_percentage":22,"total_input_tokens":35000,"total_output_tokens":8000}}' | npx claude-norns-statusline --lines=2 --oauth=false
+
+# ASCII fallback (no Nerd Font needed)
+echo '{"model":{"id":"claude-opus-4-6","display_name":"Opus 4.6"}}' | npx claude-norns-statusline --charset=text --oauth=false
+
+# Preview all themes
+echo '{}' | npx claude-norns-statusline --show-themes
+
+# Debug — dump what Claude Code sends
+echo '{"model":{"id":"claude-opus-4-6"}}' | npx claude-norns-statusline --debug-stdin --oauth=false
+cat ~/.cache/claude-norns-statusline/debug-stdin.json
+```
+
+If developing from source, replace `npx claude-norns-statusline` with `node dist/index.js`.
 
 ## Debugging
 

@@ -169,6 +169,7 @@ export interface Config {
     directory: SegmentConfig;
     custom: SegmentConfig & { options?: { command?: string } };
   };
+  lines?: number | string[][];
   customTheme?: Partial<ThemeColors>;
   shimmer: boolean;
   oauth: boolean;

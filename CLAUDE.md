@@ -5,29 +5,39 @@ Norse-themed statusline plugin for Claude Code. TypeScript, zero runtime depende
 ## Quick Reference
 
 ```bash
-npm run build          # Build to dist/index.js (single 20KB file)
+npm run build          # Build to dist/index.js (single ~25KB file)
 npm run dev            # Watch mode
 
 # Test manually
-# Real Claude Code format
 echo '{"model":{"id":"claude-opus-4-6","display_name":"Opus"},"cost":{"total_cost_usd":0.42},"context_window":{"used_percentage":22,"total_input_tokens":35000,"total_output_tokens":8000}}' | node dist/index.js --oauth=false
 
-# Legacy format (still works)
-echo '{"model":{"id":"claude-opus-4-6","display_name":"Opus 4.6"},"token_usage":{"total_tokens":45000,"total_cost":1.23,"percentage_remaining":38},"session":{"cost":1.23,"message_count":12}}' | node dist/index.js --oauth=false
+# Multi-line
+echo '{"model":{"id":"claude-opus-4-6","display_name":"Opus 4.6"},"cost":{"total_cost_usd":1.23},"context_window":{"used_percentage":62,"total_input_tokens":35000,"total_output_tokens":8000}}' | node dist/index.js --lines=2 --oauth=false
 
 # Preview all themes
 echo '{}' | node dist/index.js --show-themes
 
 # Test specific options
 echo '{"model":{"id":"claude-opus-4-6"}}' | node dist/index.js --theme=bifrost --style=capsule --charset=text --no-git --oauth=false
+
+# Install slash commands
+node dist/index.js --install-commands
 ```
 
 ## Architecture
 
 ```
+commands/norns/           # Slash command prompts (installed to ~/.claude/commands/norns/)
+├── theme.md              # /norns:theme — switch theme
+├── style.md              # /norns:style — switch style
+├── show.md               # /norns:show — enable segments
+├── hide.md               # /norns:hide — disable segments
+├── lines.md              # /norns:lines — set line count
+├── config.md             # /norns:config — show config
+└── reset.md              # /norns:reset — reset to defaults
 src/
-├── index.ts              # Entry: sync stdin read, CLI args, orchestration
-├── renderer.ts           # Segments → styled output, priority-based truncation
+├── index.ts              # Entry: sync stdin read, CLI args, --install-commands
+├── renderer.ts           # Segments → styled output, multi-line split, priority truncation
 ├── types.ts              # All shared interfaces
 ├── config/
 │   ├── defaults.ts       # Default config values
@@ -69,6 +79,22 @@ src/
     ├── path.ts           # Fish-style path abbreviation
     └── transcript.ts     # JSONL transcript parser
 ```
+
+## Slash Commands
+
+Files in `commands/norns/` — installed to `~/.claude/commands/norns/` via `--install-commands`.
+Claude Code surfaces them as `/norns:theme`, `/norns:style`, `/norns:show`, `/norns:hide`, `/norns:lines`, `/norns:config`, `/norns:reset`.
+Each is a markdown prompt that tells Claude to edit `~/.config/claude-norns-statusline/config.json`.
+Changes apply instantly — config is read from disk on every render.
+
+## Multi-line
+
+`config.lines` can be:
+- `undefined` or `1` — single line (default)
+- `2`, `3`, `4` — auto-split segments across N lines by priority
+- `[["model","git"],["session","usage"]]` — explicit layout (array of segment name arrays)
+
+Unassigned segments get appended to the last line. Each line truncates independently.
 
 ## Key Patterns
 

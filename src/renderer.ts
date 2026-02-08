@@ -16,9 +16,13 @@ export async function render(hookData: HookData, config: Config): Promise<string
   const style = getStyle(config.style);
   const segmentMap = createSegmentMap();
 
-  // Only gather enabled segments
+  // Segments in an explicit lines layout are implicitly enabled
+  const linesImplicit = new Set(
+    Array.isArray(config.lines) ? config.lines.flat() : []
+  );
+
   const enabledNames = (Object.keys(config.segments) as Array<keyof Config['segments']>)
-    .filter(name => config.segments[name].enabled);
+    .filter(name => config.segments[name].enabled || linesImplicit.has(name));
 
   // Gather all segment data in parallel
   const results = await Promise.all(
@@ -52,37 +56,91 @@ export async function render(hookData: HookData, config: Config): Promise<string
 
   if (rendered.length === 0) return '';
 
-  // Render with style
-  let output = style.render(rendered, config.charset);
+  // Split into lines
+  const lineGroups = splitIntoLines(rendered, config.lines);
 
-  // Truncate to terminal width with priority-based segment dropping
+  // Render each line independently
   const termWidth = getTerminalWidth();
-  if (visibleLength(output) > termWidth) {
-    // Try removing lowest-priority segments until it fits
-    const sorted = [...rendered].sort((a, b) => a.priority - b.priority);
-    let trimmed = [...rendered];
+  const outputLines = lineGroups.map(group => {
+    let line = style.render(group, config.charset);
 
-    while (visibleLength(style.render(trimmed, config.charset)) > termWidth && sorted.length > 1) {
-      const lowest = sorted.shift();
-      if (lowest) {
-        trimmed = trimmed.filter(s => s.name !== lowest.name);
+    // Truncate to terminal width with priority-based segment dropping
+    if (visibleLength(line) > termWidth) {
+      const sorted = [...group].sort((a, b) => a.priority - b.priority);
+      let trimmed = [...group];
+
+      while (visibleLength(style.render(trimmed, config.charset)) > termWidth && sorted.length > 1) {
+        const lowest = sorted.shift();
+        if (lowest) {
+          trimmed = trimmed.filter(s => s.name !== lowest.name);
+        }
+      }
+
+      line = style.render(trimmed, config.charset);
+
+      if (visibleLength(line) > termWidth) {
+        line = truncate(line, termWidth);
       }
     }
 
-    output = style.render(trimmed, config.charset);
-
-    // Final truncation if still too wide
-    if (visibleLength(output) > termWidth) {
-      output = truncate(output, termWidth);
+    if (config.shimmer) {
+      line = applyShimmer(line);
     }
+
+    return line;
+  });
+
+  return outputLines.join('\n');
+}
+
+function splitIntoLines(
+  segments: RenderedSegment[],
+  lines?: number | string[][],
+): RenderedSegment[][] {
+  // No multi-line config — single line
+  if (!lines || lines === 1) return [segments];
+
+  // Explicit layout: array of segment name arrays
+  if (Array.isArray(lines)) {
+    const result: RenderedSegment[][] = [];
+    const segMap = new Map(segments.map(s => [s.name, s]));
+
+    for (const group of lines) {
+      const lineSegments = group
+        .map(name => segMap.get(name))
+        .filter((s): s is RenderedSegment => s !== undefined);
+      if (lineSegments.length > 0) {
+        result.push(lineSegments);
+      }
+    }
+
+    // Any segments not assigned to a line get appended to the last line
+    const assigned = new Set(lines.flat());
+    const unassigned = segments.filter(s => !assigned.has(s.name));
+    if (unassigned.length > 0) {
+      if (result.length > 0) {
+        result[result.length - 1].push(...unassigned);
+      } else {
+        result.push(unassigned);
+      }
+    }
+
+    return result.length > 0 ? result : [segments];
   }
 
-  // Apply shimmer effect if enabled
-  if (config.shimmer) {
-    output = applyShimmer(output);
+  // Auto-split: distribute segments across N lines by priority order
+  const n = Math.min(lines, segments.length, 4);
+  if (n <= 1) return [segments];
+
+  const result: RenderedSegment[][] = Array.from({ length: n }, () => []);
+  const perLine = Math.ceil(segments.length / n);
+
+  for (let i = 0; i < segments.length; i++) {
+    const lineIdx = Math.min(Math.floor(i / perLine), n - 1);
+    result[lineIdx].push(segments[i]);
   }
 
-  return output;
+  return result.filter(group => group.length > 0);
 }
 
 // Preview all themes with sample data

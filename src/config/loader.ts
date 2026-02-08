@@ -36,7 +36,6 @@ function getConfigPaths(): string[] {
   const xdg = process.env.XDG_CONFIG_HOME || join(home, '.config');
   return [
     join(xdg, 'claude-norns-statusline', 'config.json'),
-    join(home, '.claude', 'claude-norns-statusline.json'),
     join(process.cwd(), '.claude-norns-statusline.json'),
   ];
 }
@@ -80,6 +79,14 @@ export function loadConfig(cliArgs: string[]): Config {
   if (cli.shimmer === 'true' || cli.shimmer === '') config.shimmer = true;
   if (cli.shimmer === 'false') config.shimmer = false;
   if (cli.oauth === 'false') config.oauth = false;
+
+  // Multi-line layout: --lines=2 (auto) or handled via config file for explicit arrays
+  if (cli.lines) {
+    const n = parseInt(cli.lines, 10);
+    if (!isNaN(n) && n >= 1 && n <= 4) {
+      config.lines = n === 1 ? undefined : n;
+    }
+  }
 
   // Enable/disable segments via CLI
   // --segment=true enables, --segment=NUMBER enables with priority, --no-segment disables

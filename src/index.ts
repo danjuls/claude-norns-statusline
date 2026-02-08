@@ -1,8 +1,9 @@
 // ── claude-norns-statusline ──
 // Norse-themed statusline for Claude Code
 
-import { readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, copyFileSync, unlinkSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { homedir } from 'os';
 import { loadConfig } from './config/loader.js';
 import { render, renderThemePreview } from './renderer.js';
@@ -62,8 +63,13 @@ async function main(): Promise<void> {
   }
 
   if (args.includes('--version')) {
-    const pkg = { version: '0.1.0' };
+    const pkg = { version: '0.2.0' };
     process.stdout.write(`claude-norns-statusline v${pkg.version}\n`);
+    process.exit(0);
+  }
+
+  if (args.includes('--install-commands')) {
+    installCommands();
     process.exit(0);
   }
 
@@ -96,6 +102,44 @@ async function main(): Promise<void> {
   process.stdout.write(output);
 }
 
+function installCommands(): void {
+  const pkgRoot = dirname(dirname(fileURLToPath(import.meta.url)));
+  const commandsDir = join(pkgRoot, 'commands', 'norns');
+
+  if (!existsSync(commandsDir)) {
+    process.stderr.write('Error: commands/norns/ directory not found in package.\n');
+    process.exit(1);
+  }
+
+  const targetDir = join(homedir(), '.claude', 'commands', 'norns');
+  mkdirSync(targetDir, { recursive: true });
+
+  const files = readdirSync(commandsDir).filter(f => f.endsWith('.md'));
+  let installed = 0;
+
+  for (const file of files) {
+    copyFileSync(join(commandsDir, file), join(targetDir, file));
+    installed++;
+  }
+
+  // Clean up old flat-style commands if present
+  const oldDir = join(homedir(), '.claude', 'commands');
+  for (const old of ['norns-theme', 'norns-style', 'norns-show', 'norns-hide', 'norns-config', 'norns-reset']) {
+    const oldFile = join(oldDir, `${old}.md`);
+    if (existsSync(oldFile)) {
+      try { unlinkSync(oldFile); } catch {}
+    }
+  }
+
+  process.stdout.write(`Installed ${installed} slash commands to ${targetDir}/\n`);
+  process.stdout.write('\nAvailable commands:\n');
+  for (const file of files) {
+    const name = file.replace('.md', '');
+    process.stdout.write(`  /norns:${name}\n`);
+  }
+  process.stdout.write('\nChanges take effect immediately (no restart needed).\n');
+}
+
 function printHelp(): void {
   const lines = [
     '',
@@ -108,10 +152,12 @@ function printHelp(): void {
     '    --style=NAME       Style: powerline, minimal, capsule',
     '    --charset=NAME     Charset: nerd (default), text (ASCII fallback)',
     '    --bar-style=NAME   Bar: block, classic, shade, dot, pipe',
+    '    --lines=N          Number of statusline rows (1-4, default 1)',
     '    --no-MODEL         Disable segment (e.g. --no-git, --no-usage)',
     '    --shimmer          Rainbow animation while Claude is active',
     '    --oauth=false      Disable OAuth usage tracking',
     '    --show-themes      Preview all themes',
+    '    --install-commands Install slash commands to ~/.claude/commands/',
     '    --debug-stdin      Dump stdin JSON to ~/.cache/claude-norns-statusline/debug-stdin.json',
     '    --help             Show this help',
     '    --version          Show version',
