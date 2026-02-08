@@ -78,11 +78,13 @@ Restart Claude Code and the statusline should appear at the bottom of your termi
 
 ## Themes
 
-Preview all themes at once:
+### Powerline style
 
-```bash
-echo '{}' | npx claude-norns-statusline --show-themes
-```
+<img src="screenshots/themes-powerline.png" alt="All 6 themes in powerline style" width="700">
+
+### Minimal style
+
+<img src="screenshots/themes-minimal.png" alt="All 6 themes in minimal style" width="700">
 
 | Theme | Description | Aesthetic |
 |-------|-------------|-----------|
@@ -92,6 +94,12 @@ echo '{}' | npx claude-norns-statusline --show-themes
 | **valhalla** | Hall of the Chosen | Silver light, ice blue, warm gold |
 | **mist** | Niflheim Fog | Deep slate, drifting lavender, pale cyan |
 | **jotunheim** | Frozen Realm | Deep navy, glacier cyan, frost white |
+
+Preview all themes in your terminal:
+
+```bash
+echo '{}' | npx claude-norns-statusline --show-themes
+```
 
 ## Styles
 

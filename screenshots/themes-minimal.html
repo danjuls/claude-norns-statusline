@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face {
+    font-family: 'JetBrainsMono NF';
+    src: url('/JetBrainsMonoNerdFont-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'JetBrainsMono NF';
+    src: url('/JetBrainsMonoNerdFont-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1b26;
+    padding: 32px 40px;
+    font-family: 'JetBrainsMono NF', 'SF Mono', monospace;
+  }
+  .header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  h1 {
+    color: #c0caf5;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .badge {
+    color: #7aa2f7;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: #1e2030;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #1e2030;
+  }
+  .row:last-child { border-bottom: none; }
+  .theme-name {
+    color: #bb9af7;
+    font-size: 11px;
+    width: 90px;
+    flex-shrink: 0;
+    text-transform: capitalize;
+    letter-spacing: 0.3px;
+  }
+  .statusline {
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre;
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>claude-norns-statusline</h1>
+    <span class="badge">Minimal style</span>
+  </div>
+  
+    <div class="row">
+      <div class="theme-name">yggdrasil</div>
+      <div class="statusline"><span style="color: rgb(212, 168, 71)">󰊛 Opus 4.6</span> │ <span style="color: rgb(138, 173, 106)"> screenshots</span> │ <span style="color: rgb(124, 154, 94)"> master +1 ?3</span> │ <span style="color: rgb(212, 201, 184)"> ███░░░░░░░ 34%</span> │ <span style="color: rgb(138, 173, 106)">󰌦 S:62% · 2h20m · W:38% · Max 5x</span> │ <span style="color: rgb(201, 168, 76)">󰃇 $1.85 · 54.5K tok</span></div>
+    </div>
+    <div class="row">
+      <div class="theme-name">bifrost</div>
+      <div class="statusline"><span style="color: rgb(163, 113, 247)">󰊛 Opus 4.6</span> │ <span style="color: rgb(86, 212, 200)"> screenshots</span> │ <span style="color: rgb(86, 212, 200)"> master +1 ?3</span> │ <span style="color: rgb(201, 209, 217)"> ███░░░░░░░ 34%</span> │ <span style="color: rgb(86, 212, 200)">󰌦 S:62% · 2h20m · W:38% · Max 5x</span> │ <span style="color: rgb(210, 168, 255)">󰃇 $1.85 · 54.5K tok</span></div>
+    </div>
+    <div class="row">
+      <div class="theme-name">ragnarok</div>
+      <div class="statusline"><span style="color: rgb(232, 101, 58)">󰊛 Opus 4.6</span> │ <span style="color: rgb(232, 138, 94)"> screenshots</span> │ <span style="color: rgb(232, 138, 94)"> master +1 ?3</span> │ <span style="color: rgb(232, 213, 196)"> ███░░░░░░░ 34%</span> │ <span style="color: rgb(232, 101, 58)">󰌦 S:62% · 2h20m · W:38% · Max 5x</span> │ <span style="color: rgb(232, 168, 52)">󰃇 $1.85 · 54.5K tok</span></div>
+    </div>
+    <div class="row">
+      <div class="theme-name">valhalla</div>
+      <div class="statusline"><span style="color: rgb(93, 164, 199)">󰊛 Opus 4.6</span> │ <span style="color: rgb(74, 138, 94)"> screenshots</span> │ <span style="color: rgb(74, 138, 94)"> master +1 ?3</span> │ <span style="color: rgb(42, 37, 32)"> ███░░░░░░░ 34%</span> │ <span style="color: rgb(93, 164, 199)">󰌦 S:62% · 2h20m · W:38% · Max 5x</span> │ <span style="color: rgb(184, 148, 31)">󰃇 $1.85 · 54.5K tok</span></div>
+    </div>
+    <div class="row">
+      <div class="theme-name">mist</div>
+      <div class="statusline"><span style="color: rgb(158, 140, 202)">󰊛 Opus 4.6</span> │ <span style="color: rgb(110, 184, 196)"> screenshots</span> │ <span style="color: rgb(110, 184, 196)"> master +1 ?3</span> │ <span style="color: rgb(200, 197, 212)"> ███░░░░░░░ 34%</span> │ <span style="color: rgb(158, 140, 202)">󰌦 S:62% · 2h20m · W:38% · Max 5x</span> │ <span style="color: rgb(196, 168, 78)">󰃇 $1.85 · 54.5K tok</span></div>
+    </div>
+    <div class="row">
+      <div class="theme-name">jotunheim</div>
+      <div class="statusline"><span style="color: rgb(138, 175, 240)">󰊛 Opus 4.6</span> │ <span style="color: rgb(78, 201, 212)"> screenshots</span> │ <span style="color: rgb(78, 201, 212)"> master +1 ?3</span> │ <span style="color: rgb(227, 234, 242)"> ███░░░░░░░ 34%</span> │ <span style="color: rgb(78, 201, 212)">󰌦 S:62% · 2h20m · W:38% · Max 5x</span> │ <span style="color: rgb(212, 170, 78)">󰃇 $1.85 · 54.5K tok</span></div>
+    </div>
+</body>
+</html>
