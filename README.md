@@ -45,7 +45,7 @@ npx claude-norns-statusline@latest --theme=yggdrasil
 ### From source
 
 ```bash
-git clone https://github.com/yourusername/claude-norns-statusline.git
+git clone https://github.com/danjuls/claude-norns-statusline.git
 cd claude-norns-statusline
 npm install && npm run build
 ```
