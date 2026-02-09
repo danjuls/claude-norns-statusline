@@ -1,6 +1,6 @@
 {
   "name": "claude-norns-statusline",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Norse-themed statusline for Claude Code with OAuth usage tracking, git integration, and beautiful themes",
   "type": "module",
   "bin": {
