@@ -1,6 +1,6 @@
 {
   "name": "claude-norns-statusline",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Norse-themed statusline for Claude Code with OAuth usage tracking, git integration, and beautiful themes",
   "type": "module",
   "bin": {
@@ -17,7 +17,16 @@
     "dev": "tsup --watch",
     "prepublishOnly": "npm run build"
   },
-  "keywords": ["claude", "claude-code", "statusline", "terminal", "norse", "nerd-font", "themes", "oauth"],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "statusline",
+    "terminal",
+    "norse",
+    "nerd-font",
+    "themes",
+    "oauth"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",

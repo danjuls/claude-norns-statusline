@@ -14,7 +14,14 @@ export class UsageSegment extends BaseSegment {
     if (!config.oauth) return null;
 
     const usage = await getOAuthUsage(config.cacheTtl.oauth);
-    if (!usage || usage.error) return null;
+    if (!usage) return null;
+
+    // Show hint when token is expired and couldn't be refreshed
+    if (usage.error === 'token_expired') {
+      const icon = config.charset === 'nerd' ? '\uDB80\uDF26 ' : ''; // 󰼦
+      return this.result(`${icon}token expired`);
+    }
+    if (usage.error) return null;
 
     const parts: string[] = [];
 
