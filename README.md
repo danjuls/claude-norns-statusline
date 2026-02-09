@@ -239,12 +239,26 @@ Here's what each part of the statusline shows:
 | Segment | Example | What it means |
 |---------|---------|---------------|
 | **model** | `Opus 4.6` | The active Claude model |
-| **git** | `HEAD ?9` | Current branch (or HEAD if detached), `?9` = 9 untracked files, `+3` = staged, `!2` = modified |
+| **git** | `main +2 ~1 ?3` | Branch, staged/unstaged/untracked counts (see below) |
 | **context** | `██████░░░░ 50%` | How much of Claude's context window (conversation memory) is used. When it hits 100%, older messages get compressed to make room |
 | **session** | `$4.43 · 138K tok` | Total API cost and tokens consumed this session |
 | **usage** | `S:29% · W:26%` | `S:` = 5-hour usage block consumed, `W:` = 7-day rolling usage. These are your rate limit quotas from Anthropic |
 
 The context bar is the most useful at-a-glance indicator — it tells you how deep into a conversation you are before context compression kicks in.
+
+### Git indicators
+
+| Symbol | Meaning | Example |
+|--------|---------|---------|
+| `+N` | Staged files (ready to commit) | `+3` = 3 files staged |
+| `~N` | Unstaged modifications | `~2` = 2 files modified but not staged |
+| `?N` | Untracked files (new, unknown to git) | `?1` = 1 new file |
+| `↑N` | Commits ahead of remote | `↑2` = 2 unpushed commits |
+| `↓N` | Commits behind remote | `↓3` = 3 commits to pull |
+| `⚑N` | Stash entries | `⚑1` = 1 stashed change |
+| `●` | Dirty working tree (generic, when no specific counts) | — |
+
+Multiple indicators combine: `main +2 ~1 ?3` means 2 staged, 1 modified, 3 untracked.
 
 ## Segments
 
