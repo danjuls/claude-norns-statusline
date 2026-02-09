@@ -251,8 +251,9 @@ export async function getOAuthUsage(cacheTtl: number): Promise<OAuthUsage | null
   const allCreds = getAllCredentials();
   if (allCreds.length === 0) return null;
 
-  // Track plan tier from any credential source (even expired ones have this)
+  // Track plan tier and last error across credential sources
   let planTier: string | undefined;
+  let lastError: string | undefined;
 
   for (const creds of allCreds) {
     if (creds.rateLimitTier) {
@@ -273,6 +274,7 @@ export async function getOAuthUsage(cacheTtl: number): Promise<OAuthUsage | null
         activeCreds = refreshed;
       } else {
         // Refresh failed — skip this source, try next
+        lastError = 'token_expired';
         continue;
       }
     }
@@ -296,16 +298,21 @@ export async function getOAuthUsage(cacheTtl: number): Promise<OAuthUsage | null
         }
       }
       // This source failed — try next
+      lastError = usage.error;
       continue;
     }
 
-    if (!usage.error) {
-      if (planTier) usage.planTier = planTier;
-      setCache(CACHE_KEY, usage, cacheTtl);
-      return usage;
+    if (usage.error) {
+      // Non-auth failure (network, timeout, parse) — track and try next source
+      lastError = usage.error;
+      continue;
     }
+
+    if (planTier) usage.planTier = planTier;
+    setCache(CACHE_KEY, usage, cacheTtl);
+    return usage;
   }
 
-  // All sources exhausted — return token_expired so segment can show hint
-  return { sessionUsagePercent: 0, weeklyUsagePercent: 0, resetSeconds: 0, planTier: planTier || 'unknown', error: 'token_expired' };
+  // All sources exhausted — return the actual last error
+  return { sessionUsagePercent: 0, weeklyUsagePercent: 0, resetSeconds: 0, planTier: planTier || 'unknown', error: lastError || 'no_credentials' };
 }

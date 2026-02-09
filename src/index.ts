@@ -1,6 +1,8 @@
 // ── claude-norns-statusline ──
 // Norse-themed statusline for Claude Code
 
+declare const PKG_VERSION: string;
+
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, copyFileSync, unlinkSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -63,8 +65,7 @@ async function main(): Promise<void> {
   }
 
   if (args.includes('--version')) {
-    const pkg = { version: '0.2.0' };
-    process.stdout.write(`claude-norns-statusline v${pkg.version}\n`);
+    process.stdout.write(`claude-norns-statusline v${PKG_VERSION}\n`);
     process.exit(0);
   }
 

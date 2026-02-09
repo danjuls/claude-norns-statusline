@@ -16,8 +16,8 @@ export class UsageSegment extends BaseSegment {
     const usage = await getOAuthUsage(config.cacheTtl.oauth);
     if (!usage) return null;
 
-    // Show hint when token is expired and couldn't be refreshed
-    if (usage.error === 'token_expired') {
+    // Show hint for auth errors; silently hide for transient failures (network, timeout)
+    if (usage.error === 'token_expired' || usage.error === 'auth_error') {
       const icon = config.charset === 'nerd' ? '\uDB80\uDF26 ' : ''; // 󰼦
       return this.result(`${icon}token expired`);
     }
