@@ -26,6 +26,12 @@ export class ContextSegment extends BaseSegment {
 
     if (pct === null) return null;
 
+    // Normalize so compaction threshold (default 80%) displays as 100%
+    const ceiling = config.contextCeiling;
+    if (ceiling && ceiling > 0 && ceiling < 100) {
+      pct = Math.min(100, (pct / ceiling) * 100);
+    }
+
     const bar = buildBar(pct, config.barWidth, config.barStyle);
     const label = formatPercent(pct);
     const icon = config.charset === 'nerd' ? '\uF0D0 ' : 'Ctx '; //

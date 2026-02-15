@@ -173,6 +173,7 @@ export interface Config {
   customTheme?: Partial<ThemeColors>;
   shimmer: boolean;
   oauth: boolean;
+  contextCeiling?: number;
   cacheTtl: {
     git: number;
     oauth: number;

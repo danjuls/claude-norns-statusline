@@ -22,6 +22,7 @@ export const DEFAULT_CONFIG: Config = {
     directory: { enabled: false, priority: 10 },
     custom: { enabled: false, priority: 5 },
   },
+  contextCeiling: 80,
   shimmer: false,
   oauth: true,
   cacheTtl: {
