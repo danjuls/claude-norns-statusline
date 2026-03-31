@@ -16,12 +16,16 @@ export class UsageSegment extends BaseSegment {
     const usage = await getOAuthUsage(config.cacheTtl.oauth);
     if (!usage) return null;
 
-    // Show hint for auth errors; silently hide for transient failures (network, timeout)
-    if (usage.error === 'token_expired' || usage.error === 'auth_error') {
+    if (usage.error) {
       const icon = config.charset === 'nerd' ? '\uDB80\uDF26 ' : ''; // 󰼦
-      return this.result(`${icon}token expired`);
+      if (usage.error === 'token_expired' || usage.error === 'auth_error') {
+        return this.result(`${icon}auth expired`);
+      }
+      // Show brief indicator for transient failures so users know something is off
+      if (usage.error === 'network_error') return this.result(`${icon}offline`);
+      if (usage.error === 'timeout') return this.result(`${icon}timeout`);
+      return null;
     }
-    if (usage.error) return null;
 
     const parts: string[] = [];
 

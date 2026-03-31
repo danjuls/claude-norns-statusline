@@ -34,6 +34,17 @@ export class SessionSegment extends BaseSegment {
 
     const icon = config.charset === 'nerd' ? '\uDB80\uDCC7 ' : ''; // 󰳇
 
-    return this.result(`${icon}${parts.join(' \u00B7 ')}`);
+    let content = `${icon}${parts.join(' · ')}`;
+
+    // Append budget warning if daily budget is configured and approaching limit
+    if (config.budget?.daily && cost !== undefined && cost > 0) {
+      const pct = Math.round((cost / config.budget.daily) * 100);
+      const warnAt = config.budget.warnAt ?? 80;
+      if (pct >= warnAt) {
+        content += ` ⚠${pct}%`;
+      }
+    }
+
+    return this.result(content);
   }
 }
