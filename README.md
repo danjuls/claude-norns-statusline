@@ -48,7 +48,7 @@ claude-norns-statusline --install-commands
 
 - **6 Norse themes** — Yggdrasil, Bifrost, Ragnarok, Valhalla, Mist, Jotunheim
 - **3 rendering styles** — Powerline arrows, minimal pipes, capsule pills
-- **12 segments** — model, git, context, session, usage, block, daily, metrics, version, tmux, directory, custom
+- **17 segments** — model, git, context, session, usage, ratelimit, agent, block, daily, diff, metrics, sparkline, activity, version, tmux, directory, custom
 - **Multi-line layout** — spread segments across 1-4 rows
 - **Slash commands** — `/norns:theme bifrost` to change settings live, no restart needed
 - **Smart truncation** — priority-based segment dropping when terminal is narrow
@@ -246,6 +246,20 @@ Here's what each part of the statusline shows:
 
 The context bar is the most useful at-a-glance indicator — it tells you how deep into a conversation you are before context compression kicks in.
 
+### Optional segments
+
+Enable these for deeper insight — via `/norns:show` or `--segment=true`:
+
+| Segment | Example | What it means |
+|---------|---------|---------------|
+| **ratelimit** | `█████░░░ 75% · 2h` | Visual bar of your 5-hour usage window with time until reset |
+| **agent** | `Explore` | Name of the currently active agent/subagent |
+| **diff** | `+142 -38` | Lines of code added and removed this session |
+| **sparkline** | `▁▂▃▅▇` | Cost trend over time — see if spending is accelerating or steady |
+| **activity** | `reading file.ts` | What Claude is doing right now (parsed from transcript) |
+| **daily** | `$12.50 (62%)` | Daily aggregate cost with budget percentage |
+| **block** | `$3.20 · 45K · 2h left` | 5-hour block tracking with cost, tokens, and time remaining |
+
 ### Git indicators
 
 | Symbol | Meaning | Example |
@@ -269,11 +283,16 @@ Segments are the building blocks of the statusline. Each gathers its own data an
 | **model** | on | 100 | Active Claude model name |
 | **git** | on | 90 | Branch, dirty/staged/untracked counts, ahead/behind |
 | **context** | on | 80 | Context window usage with progress bar |
-| **session** | on | 70 | Session cost and token count |
+| **session** | on | 70 | Session cost and token count (with budget warnings) |
 | **usage** | on | 60 | OAuth API session/weekly usage percentages |
-| **block** | off | 50 | 5-hour usage block tracking |
-| **daily** | off | 45 | Daily aggregate cost/tokens |
+| **ratelimit** | off | 65 | Visual progress bar of 5-hour usage window with reset countdown |
+| **agent** | off | 55 | Active agent/subagent name |
+| **block** | off | 50 | 5-hour usage block tracking (cost/tokens from transcript) |
+| **daily** | off | 45 | Daily aggregate cost with persistent tracking and budget % |
+| **diff** | off | 35 | Lines added/removed in the current session (`+142 -38`) |
 | **metrics** | off | 40 | Message count and session duration |
+| **sparkline** | off | 25 | Cost-over-time sparkline from transcript (`▁▂▃▅▇`) |
+| **activity** | off | 15 | Current Claude action (e.g. "reading file.ts", "running cmd") |
 | **version** | off | 30 | Claude Code version |
 | **tmux** | off | 20 | Tmux session name |
 | **directory** | off | 10 | CWD with fish-style path abbreviation |
@@ -338,11 +357,18 @@ Settings are resolved in this order (highest priority first):
     "context": { "enabled": true, "priority": 80 },
     "session": { "enabled": true, "priority": 70 },
     "usage": { "enabled": true, "priority": 60 },
+    "diff": { "enabled": true, "priority": 35 },
     "metrics": { "enabled": true, "priority": 40 },
     "directory": { "enabled": true, "priority": 10 }
+  },
+  "budget": {
+    "daily": 20,
+    "warnAt": 80
   }
 }
 ```
+
+The `budget` section is optional. When configured, the **session** segment shows a `⚠90%` warning when your session cost exceeds the `warnAt` threshold (default 80%) of your daily budget. The **daily** segment shows the running total with a percentage of your budget.
 
 ### CLI reference
 
