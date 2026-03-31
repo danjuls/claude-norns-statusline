@@ -47,11 +47,16 @@ src/
 │   ├── model.ts          # Active Claude model name
 │   ├── git.ts            # Branch, dirty status, ahead/behind
 │   ├── context.ts        # Context window % with progress bar
-│   ├── session.ts        # Cost + token counts
+│   ├── session.ts        # Cost + token counts + budget warnings
 │   ├── usage.ts          # OAuth API session/weekly usage
-│   ├── block.ts          # 5-hour block tracking
-│   ├── daily.ts          # Daily aggregate
+│   ├── ratelimit.ts      # 5-hour usage bar with reset countdown
+│   ├── agent.ts          # Active agent/subagent name
+│   ├── block.ts          # 5-hour block tracking via transcript
+│   ├── daily.ts          # Daily aggregate with persistent cache
+│   ├── diff.ts           # Lines added/removed in session
 │   ├── metrics.ts        # Message count, duration
+│   ├── sparkline.ts      # Cost-over-time sparkline from transcript
+│   ├── activity.ts       # Current Claude action from transcript
 │   ├── version.ts        # Claude Code version
 │   ├── tmux.ts           # Tmux session name
 │   ├── directory.ts      # CWD with fish-style abbreviation
@@ -76,8 +81,9 @@ src/
     ├── git-ops.ts        # Parallel git commands, 2s timeouts
     ├── format.ts         # Number/duration/cost formatters
     ├── bar.ts            # 5 progress bar styles
+    ├── sparkline.ts      # Unicode sparkline renderer
     ├── path.ts           # Fish-style path abbreviation
-    └── transcript.ts     # JSONL transcript parser
+    └── transcript.ts     # JSONL transcript parser + bucket aggregation
 ```
 
 ## Slash Commands
@@ -130,4 +136,4 @@ Debug with `--debug-stdin` to dump stdin to `~/.cache/claude-norns-statusline/de
 
 model (100) → git (90) → context (80) → session (70) → usage (60)
 
-Disabled by default: block, daily, metrics, version, tmux, directory, custom
+Disabled by default: ratelimit (65), agent (55), block (50), daily (45), metrics (40), diff (35), version (30), sparkline (25), tmux (20), activity (15), directory (10), custom (5)

@@ -77,6 +77,59 @@ function parseLine(line: string): TranscriptMessage | null {
   }
 }
 
+// ── Bucket Aggregation (for sparkline) ──
+
+export async function parseTranscriptBuckets(path: string, bucketCount = 16): Promise<number[] | null> {
+  if (!path || !existsSync(path)) return null;
+
+  try {
+    const stat = statSync(path);
+    const content = stat.size > STREAMING_THRESHOLD
+      ? await readStreamingLines(path)
+      : readFileSync(path, 'utf-8').trim().split('\n');
+
+    const entries: { ts: number; cost: number }[] = [];
+    for (const line of content) {
+      const msg = parseLine(line);
+      if (msg?.costUSD && msg.timestamp) {
+        entries.push({ ts: new Date(msg.timestamp).getTime(), cost: msg.costUSD });
+      }
+    }
+
+    if (entries.length < 2) return null;
+
+    entries.sort((a, b) => a.ts - b.ts);
+    const start = entries[0].ts;
+    const end = entries[entries.length - 1].ts;
+    const span = end - start;
+    if (span <= 0) return null;
+
+    const buckets = new Array(bucketCount).fill(0);
+    for (const e of entries) {
+      const idx = Math.min(Math.floor(((e.ts - start) / span) * bucketCount), bucketCount - 1);
+      buckets[idx] += e.cost;
+    }
+
+    return buckets;
+  } catch {
+    return null;
+  }
+}
+
+async function readStreamingLines(path: string): Promise<string[]> {
+  const lines: string[] = [];
+  const rl = createInterface({
+    input: createReadStream(path, { encoding: 'utf-8' }),
+    crlfDelay: Infinity,
+  });
+  for await (const line of rl) {
+    lines.push(line);
+  }
+  return lines;
+}
+
+// ── Summary Aggregation ──
+
 function aggregateMessages(messages: TranscriptMessage[]): TranscriptSummary {
   let totalInputTokens = 0;
   let totalOutputTokens = 0;
