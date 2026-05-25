@@ -1,6 +1,7 @@
 // ── Glow Shimmer Effect ──
-// A traveling light sweep that brightens the theme's existing colors.
-// Preserves the theme aesthetic — no rainbow, just a warm glow passing across.
+// A traveling light sweep tinted with the active theme's highlight color.
+// Theme-bound — the band pulls characters toward the theme accent as it
+// passes, like light catching a surface, instead of washing toward white.
 // Animates naturally as Claude Code refreshes the statusline (~150ms).
 
 const ESC = '\x1b[';
@@ -8,25 +9,30 @@ const ANSI_RE = /\x1b\[[0-9;]*m/g;
 const FG_RE = /\x1b\[38;2;(\d+);(\d+);(\d+)m/;
 const BG_RE = /\x1b\[48;2;(\d+);(\d+);(\d+)m/;
 
+type RGB = [number, number, number];
+
+// Default highlight if no theme color is supplied (warm white)
+const DEFAULT_HIGHLIGHT: RGB = [255, 255, 255];
+
 function lerp(a: number, b: number, t: number): number {
   return Math.round(a + (b - a) * t);
 }
 
-// Brighten an RGB color toward white by intensity (0–1)
-function brighten(r: number, g: number, b: number, intensity: number): [number, number, number] {
+// Blend an RGB color toward a target by intensity (0–1)
+function blend(r: number, g: number, b: number, target: RGB, intensity: number): RGB {
   return [
-    lerp(r, 255, intensity),
-    lerp(g, 255, intensity),
-    lerp(b, 255, intensity),
+    lerp(r, target[0], intensity),
+    lerp(g, target[1], intensity),
+    lerp(b, target[2], intensity),
   ];
 }
 
 /**
  * Apply a traveling glow to an ANSI-colored string.
- * Keeps all theme colors intact but brightens characters as a
- * light band sweeps across, like a reflection on metal.
+ * Keeps theme colors intact but pulls characters toward `highlight`
+ * as a light band sweeps across, like a reflection catching the light.
  */
-export function applyShimmer(input: string): string {
+export function applyShimmer(input: string, highlight: RGB = DEFAULT_HIGHLIGHT): string {
   const now = Date.now() / 1000;
 
   // Two sweep bands at different speeds for depth
@@ -100,17 +106,17 @@ export function applyShimmer(input: string): string {
 
       intensity = Math.min(intensity, 0.75);
 
-      // Apply brightening to current foreground
+      // Pull foreground toward the theme highlight at the sweep peak
       let fgCode = '';
       if (currentFg) {
-        const [r, g, b] = brighten(currentFg[0], currentFg[1], currentFg[2], intensity);
+        const [r, g, b] = blend(currentFg[0], currentFg[1], currentFg[2], highlight, intensity);
         fgCode = `${ESC}38;2;${r};${g};${b}m`;
       }
 
-      // Apply subtle brightening to background too (half intensity)
+      // Tint background toward the highlight much more subtly (a soft halo)
       let bgCode = '';
       if (currentBg) {
-        const [r, g, b] = brighten(currentBg[0], currentBg[1], currentBg[2], intensity * 0.4);
+        const [r, g, b] = blend(currentBg[0], currentBg[1], currentBg[2], highlight, intensity * 0.22);
         bgCode = `${ESC}48;2;${r};${g};${b}m`;
       }
 

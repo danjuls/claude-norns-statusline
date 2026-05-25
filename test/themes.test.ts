@@ -4,15 +4,15 @@ import { DEFAULT_CONFIG } from '../src/config/defaults.js';
 import type { Config, ThemeColors } from '../src/types.js';
 
 describe('themes', () => {
-  it('has all 6 built-in themes', () => {
-    expect(Object.keys(themes)).toHaveLength(6);
+  it('has all 7 built-in themes', () => {
+    expect(Object.keys(themes)).toHaveLength(7);
     expect(Object.keys(themes)).toEqual(
-      expect.arrayContaining(['yggdrasil', 'bifrost', 'ragnarok', 'valhalla', 'mist', 'jotunheim'])
+      expect.arrayContaining(['yggdrasil', 'bifrost', 'ragnarok', 'valhalla', 'mist', 'jotunheim', 'nott'])
     );
   });
 
   it('getAllThemes returns all themes', () => {
-    expect(getAllThemes()).toHaveLength(6);
+    expect(getAllThemes()).toHaveLength(7);
   });
 
   it('getTheme returns configured theme', () => {

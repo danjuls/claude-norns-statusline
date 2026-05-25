@@ -1,6 +1,6 @@
 Switch the claude-norns-statusline theme to: $ARGUMENTS
 
-Available themes: yggdrasil, bifrost, ragnarok, valhalla, mist, jotunheim
+Available themes: yggdrasil, bifrost, ragnarok, valhalla, mist, jotunheim, nott (Tokyo Night)
 
 Instructions:
 1. Read the config file at `~/.config/claude-norns-statusline/config.json` (if it exists)

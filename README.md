@@ -46,7 +46,7 @@ claude-norns-statusline --install-commands
 
 ## Features
 
-- **6 Norse themes** — Yggdrasil, Bifrost, Ragnarok, Valhalla, Mist, Jotunheim
+- **7 Norse themes** — Yggdrasil, Bifrost, Ragnarok, Valhalla, Mist, Jotunheim, Nótt
 - **3 rendering styles** — Powerline arrows, minimal pipes, capsule pills
 - **19 segments** — model, git, context, session, usage, ratelimit, agent, tasks, subagents, block, daily, diff, metrics, sparkline, activity, version, tmux, directory, custom
 - **Multi-line layout** — spread segments across 1-4 rows
@@ -210,6 +210,7 @@ Any enabled segments not assigned to a line get appended to the last line.
 | **valhalla** | Hall of the Chosen | Silver light, ice blue, warm gold |
 | **mist** | Niflheim Fog | Deep slate, drifting lavender, pale cyan |
 | **jotunheim** | Frozen Realm | Deep navy, glacier cyan, frost white |
+| **nott** | Goddess of Night | Midnight indigo, soft blue, twilight violet (Tokyo Night) |
 
 Preview all themes in your terminal:
 

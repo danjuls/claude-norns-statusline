@@ -7,6 +7,7 @@ import { ragnarok } from './ragnarok.js';
 import { valhalla } from './valhalla.js';
 import { mist } from './mist.js';
 import { jotunheim } from './jotunheim.js';
+import { nott } from './nott.js';
 
 const themes: Record<string, Theme> = {
   yggdrasil,
@@ -15,6 +16,7 @@ const themes: Record<string, Theme> = {
   valhalla,
   mist,
   jotunheim,
+  nott,
 };
 
 export function getTheme(config: Config): Theme {

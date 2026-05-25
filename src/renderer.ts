@@ -6,7 +6,7 @@ import { getTheme, getAllThemes } from './themes/index.js';
 import { getStyle } from './styles/index.js';
 import { powerline as powerlineStyle } from './styles/powerline.js';
 import { createSegmentMap } from './segments/index.js';
-import { visibleLength, truncate, fg, bg, fgBg, reset } from './utils/ansi.js';
+import { visibleLength, truncate, fg, bg, fgBg, reset, hexToRgb, lerpColor } from './utils/ansi.js';
 import { getTerminalWidth } from './utils/terminal.js';
 import { buildBar } from './utils/bar.js';
 import { applyShimmer } from './utils/shimmer.js';
@@ -61,6 +61,12 @@ export async function render(hookData: HookData, config: Config): Promise<string
 
   // Render each line independently
   const termWidth = getTerminalWidth();
+
+  // Shimmer sweeps toward a luminous version of the theme accent (theme-bound)
+  const shimmerHighlight = config.shimmer
+    ? hexToRgb(lerpColor(theme.colors.accent2, '#ffffff', 0.35))
+    : null;
+
   const outputLines = lineGroups.map(group => {
     let line = style.render(group, config.charset);
 
@@ -83,8 +89,8 @@ export async function render(hookData: HookData, config: Config): Promise<string
       }
     }
 
-    if (config.shimmer) {
-      line = applyShimmer(line);
+    if (config.shimmer && shimmerHighlight) {
+      line = applyShimmer(line, shimmerHighlight);
     }
 
     return line;

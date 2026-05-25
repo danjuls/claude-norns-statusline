@@ -63,13 +63,14 @@ src/
 │   ├── tmux.ts           # Tmux session name
 │   ├── directory.ts      # CWD with fish-style abbreviation
 │   └── custom.ts         # User shell command
-├── themes/               # 6 Norse themes
+├── themes/               # 7 Norse themes
 │   ├── yggdrasil.ts      # Default: deep forest
 │   ├── bifrost.ts        # Aurora borealis
 │   ├── ragnarok.ts       # Fire and twilight
 │   ├── valhalla.ts       # Noble light
 │   ├── mist.ts           # Niflheim fog
-│   └── jotunheim.ts      # Frozen realm
+│   ├── jotunheim.ts      # Frozen realm
+│   └── nott.ts           # Goddess of Night (Tokyo Night palette)
 ├── styles/               # 3 rendering styles
 │   ├── minimal.ts        # Pipe separators
 │   ├── powerline.ts      # Arrow glyphs (default)
