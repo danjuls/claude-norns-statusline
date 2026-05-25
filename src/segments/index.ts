@@ -5,6 +5,9 @@ export { GitSegment } from './git.js';
 export { ContextSegment } from './context.js';
 export { SessionSegment } from './session.js';
 export { UsageSegment } from './usage.js';
+export { TasksSegment } from './tasks.js';
+export { SubagentsSegment } from './subagents.js';
+export { DiffSegment } from './diff.js';
 export { BlockSegment } from './block.js';
 export { DailySegment } from './daily.js';
 export { MetricsSegment } from './metrics.js';
@@ -19,6 +22,9 @@ import { GitSegment } from './git.js';
 import { ContextSegment } from './context.js';
 import { SessionSegment } from './session.js';
 import { UsageSegment } from './usage.js';
+import { TasksSegment } from './tasks.js';
+import { SubagentsSegment } from './subagents.js';
+import { DiffSegment } from './diff.js';
 import { BlockSegment } from './block.js';
 import { DailySegment } from './daily.js';
 import { MetricsSegment } from './metrics.js';
@@ -34,6 +40,9 @@ export function createSegmentMap(): Record<string, Segment> {
     context: new ContextSegment(),
     session: new SessionSegment(),
     usage: new UsageSegment(),
+    tasks: new TasksSegment(),
+    subagents: new SubagentsSegment(),
+    diff: new DiffSegment(),
     block: new BlockSegment(),
     daily: new DailySegment(),
     metrics: new MetricsSegment(),

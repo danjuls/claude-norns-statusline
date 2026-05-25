@@ -113,3 +113,98 @@ function aggregateMessages(messages: TranscriptMessage[]): TranscriptSummary {
     durationMs: lastTimestamp - firstTimestamp,
   };
 }
+
+// ── Task Tracking ──
+// Reconstructs task progress from a transcript's tool_use events.
+// Supports both the TaskCreate/TaskUpdate event system and TodoWrite snapshots;
+// whichever produced the most recent event wins.
+
+export interface TaskSummary {
+  completed: number;
+  total: number;
+  activeForm: string | null; // present-continuous label of the in-progress task
+  lastEventMs: number;       // timestamp of the most recent task event
+}
+
+interface TaskState {
+  created: { activeForm: string; status: string }[]; // TaskCreate order = id #1..N
+  todoSnapshot: { activeForm: string; status: string }[] | null;
+  lastTaskEventMs: number;
+  lastTodoEventMs: number;
+}
+
+function processTaskLine(state: TaskState, line: string): void {
+  let entry: { message?: { content?: unknown }; timestamp?: string };
+  try {
+    entry = JSON.parse(line);
+  } catch {
+    return;
+  }
+  const content = entry?.message?.content;
+  if (!Array.isArray(content)) return;
+
+  const ts = entry.timestamp ? new Date(entry.timestamp).getTime() : 0;
+
+  for (const block of content) {
+    if (!block || block.type !== 'tool_use') continue;
+    const input = (block.input ?? {}) as Record<string, unknown>;
+
+    if (block.name === 'TaskCreate') {
+      const activeForm = (input.activeForm || input.subject || '') as string;
+      state.created.push({ activeForm, status: 'pending' });
+      if (ts) state.lastTaskEventMs = Math.max(state.lastTaskEventMs, ts);
+    } else if (block.name === 'TaskUpdate') {
+      const id = parseInt(String(input.taskId), 10);
+      const task = state.created[id - 1];
+      if (task && typeof input.status === 'string') task.status = input.status;
+      if (ts) state.lastTaskEventMs = Math.max(state.lastTaskEventMs, ts);
+    } else if (block.name === 'TodoWrite' && Array.isArray(input.todos)) {
+      state.todoSnapshot = (input.todos as Record<string, unknown>[]).map(t => ({
+        activeForm: (t.activeForm || t.content || '') as string,
+        status: (t.status || 'pending') as string,
+      }));
+      if (ts) state.lastTodoEventMs = Math.max(state.lastTodoEventMs, ts);
+    }
+  }
+}
+
+function summarizeTasks(state: TaskState): TaskSummary | null {
+  const useTodo = state.todoSnapshot !== null && state.lastTodoEventMs >= state.lastTaskEventMs;
+  const items = useTodo ? state.todoSnapshot! : state.created;
+  if (items.length === 0) return null;
+
+  const completed = items.filter(t => t.status === 'completed').length;
+  const active = items.find(t => t.status === 'in_progress');
+
+  return {
+    completed,
+    total: items.length,
+    activeForm: active?.activeForm || null,
+    lastEventMs: Math.max(state.lastTaskEventMs, state.lastTodoEventMs),
+  };
+}
+
+export async function parseTasks(path: string): Promise<TaskSummary | null> {
+  if (!path || !existsSync(path)) return null;
+
+  try {
+    const state: TaskState = { created: [], todoSnapshot: null, lastTaskEventMs: 0, lastTodoEventMs: 0 };
+    const stat = statSync(path);
+
+    if (stat.size > STREAMING_THRESHOLD) {
+      const rl = createInterface({
+        input: createReadStream(path, { encoding: 'utf-8' }),
+        crlfDelay: Infinity,
+      });
+      for await (const line of rl) processTaskLine(state, line);
+    } else {
+      for (const line of readFileSync(path, 'utf-8').trim().split('\n')) {
+        processTaskLine(state, line);
+      }
+    }
+
+    return summarizeTasks(state);
+  } catch {
+    return null;
+  }
+}

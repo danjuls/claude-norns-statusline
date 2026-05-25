@@ -44,6 +44,12 @@ export interface HookData {
 
   exceeds_200k_tokens?: boolean;
 
+  // Rate limits (provided directly by Claude Code — no OAuth call needed)
+  rate_limits?: {
+    five_hour?: { used_percentage?: number; resets_at?: number };
+    seven_day?: { used_percentage?: number; resets_at?: number };
+  };
+
   // Optional fields
   vim?: { mode?: string };
   agent?: { name?: string };
@@ -91,6 +97,9 @@ export interface ThemeColors {
     context: { bg: string; fg: string };
     session: { bg: string; fg: string };
     usage: { bg: string; fg: string };
+    tasks: { bg: string; fg: string };
+    subagents: { bg: string; fg: string };
+    diff: { bg: string; fg: string };
     block: { bg: string; fg: string };
     daily: { bg: string; fg: string };
     metrics: { bg: string; fg: string };
@@ -161,6 +170,9 @@ export interface Config {
     context: SegmentConfig;
     session: SegmentConfig;
     usage: SegmentConfig;
+    tasks: SegmentConfig;
+    subagents: SegmentConfig;
+    diff: SegmentConfig;
     block: SegmentConfig;
     daily: SegmentConfig;
     metrics: SegmentConfig;

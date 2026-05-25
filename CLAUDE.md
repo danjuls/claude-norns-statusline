@@ -48,7 +48,10 @@ src/
 │   ├── git.ts            # Branch, dirty status, ahead/behind
 │   ├── context.ts        # Context window % with progress bar
 │   ├── session.ts        # Cost + token counts
-│   ├── usage.ts          # OAuth API session/weekly usage
+│   ├── usage.ts          # Session/weekly usage (stdin rate_limits → OAuth fallback)
+│   ├── tasks.ts          # Task/todo progress from transcript (completed/total + active)
+│   ├── subagents.ts      # Live running subagents (type, activity, output, elapsed)
+│   ├── diff.ts           # Lines added/removed this session (cost.total_lines_*)
 │   ├── block.ts          # 5-hour block tracking
 │   ├── daily.ts          # Daily aggregate
 │   ├── metrics.ts        # Message count, duration
@@ -72,6 +75,7 @@ src/
     ├── terminal.ts       # Width + color depth detection
     ├── cache.ts          # File-based cache with TTL
     ├── oauth.ts          # OAuth token discovery (file + Keychain + env) + usage API
+    ├── subagents.ts      # Reads running subagents from session sidechain transcripts
     ├── shimmer.ts        # Rainbow HSV animation effect
     ├── git-ops.ts        # Parallel git commands, 2s timeouts
     ├── format.ts         # Number/duration/cost formatters
@@ -110,7 +114,9 @@ Unassigned segments get appended to the last line. Each line truncates independe
 
 ## Claude Code Stdin Fields
 
-Real fields: `model.{id,display_name}`, `cost.{total_cost_usd,total_duration_ms}`, `context_window.{used_percentage,remaining_percentage,total_input_tokens,total_output_tokens}`, `version`, `workspace.{current_dir,project_dir}`, `cwd`
+Real fields: `model.{id,display_name}`, `cost.{total_cost_usd,total_duration_ms}`, `context_window.{used_percentage,remaining_percentage,total_input_tokens,total_output_tokens,context_window_size,current_usage.*}`, `rate_limits.{five_hour,seven_day}.{used_percentage,resets_at}`, `version`, `workspace.{current_dir,project_dir}`, `cwd`, `transcript_path`, `session_id`
+
+`rate_limits.*.resets_at` is a unix timestamp (seconds). The usage segment prefers this over the OAuth API — no network call when present.
 
 Debug with `--debug-stdin` to dump stdin to `~/.cache/claude-norns-statusline/debug-stdin.json`
 
@@ -130,4 +136,6 @@ Debug with `--debug-stdin` to dump stdin to `~/.cache/claude-norns-statusline/de
 
 model (100) → git (90) → context (80) → session (70) → usage (60)
 
-Disabled by default: block, daily, metrics, version, tmux, directory, custom
+Disabled by default: diff (53), tasks (52), subagents (51), block, daily, metrics, version, tmux, directory, custom
+
+`tasks` and `subagents` read from the session transcript via `transcript_path`. Subagent sidechains live at `<transcript_path without .jsonl>/subagents/agent-*.{meta.json,jsonl}`; a subagent counts as running if its `.jsonl` was touched within 20s. Tasks support both the TaskCreate/TaskUpdate event system and TodoWrite snapshots, hidden after 2 min of no task activity.

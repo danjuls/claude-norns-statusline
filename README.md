@@ -48,14 +48,15 @@ claude-norns-statusline --install-commands
 
 - **6 Norse themes** — Yggdrasil, Bifrost, Ragnarok, Valhalla, Mist, Jotunheim
 - **3 rendering styles** — Powerline arrows, minimal pipes, capsule pills
-- **12 segments** — model, git, context, session, usage, block, daily, metrics, version, tmux, directory, custom
+- **15 segments** — model, git, context, session, usage, diff, tasks, subagents, block, daily, metrics, version, tmux, directory, custom
 - **Multi-line layout** — spread segments across 1-4 rows
 - **Slash commands** — `/norns:theme bifrost` to change settings live, no restart needed
 - **Smart truncation** — priority-based segment dropping when terminal is narrow
 - **Nerd Font + text fallback** — works with or without patched fonts
 - **5 progress bar styles** — block `█░`, classic `━─`, shade `▓░`, dot `●○`, pipe `┃┊`
 - **Rainbow shimmer** — time-based HSV animation while Claude is active
-- **OAuth usage tracking** — session and weekly API usage (auto-discovers credentials)
+- **Usage tracking** — session and weekly API usage, read from Claude Code's stdin rate limits (no network) with OAuth credential discovery as fallback
+- **Live task & subagent tracking** — task/todo progress and running subagents parsed from the session transcript
 - **File-based caching** — configurable TTLs for git, OAuth, and transcript data
 - **Truecolor support** — 24-bit hex colors with automatic fallback
 
@@ -270,7 +271,10 @@ Segments are the building blocks of the statusline. Each gathers its own data an
 | **git** | on | 90 | Branch, dirty/staged/untracked counts, ahead/behind |
 | **context** | on | 80 | Context window usage with progress bar |
 | **session** | on | 70 | Session cost and token count |
-| **usage** | on | 60 | OAuth API session/weekly usage percentages |
+| **usage** | on | 60 | Session/weekly usage % (stdin rate limits, OAuth fallback) |
+| **diff** | off | 53 | Lines added/removed this session (`+120 -45`) |
+| **tasks** | off | 52 | Task/todo progress: completed/total + active task |
+| **subagents** | off | 51 | Live running subagents: type, activity, output, elapsed |
 | **block** | off | 50 | 5-hour usage block tracking |
 | **daily** | off | 45 | Daily aggregate cost/tokens |
 | **metrics** | off | 40 | Message count and session duration |
