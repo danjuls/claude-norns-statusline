@@ -1,6 +1,6 @@
 Enable the following claude-norns-statusline segments: $ARGUMENTS
 
-Available segments: model, git, context, session, usage, diff, tasks, subagents, block, daily, metrics, version, tmux, directory, custom
+Available segments: model, git, context, session, usage, ratelimit, agent, tasks, subagents, block, daily, diff, metrics, sparkline, activity, version, tmux, directory, custom
 
 Instructions:
 1. Read the config file at `~/.config/claude-norns-statusline/config.json` (if it exists)

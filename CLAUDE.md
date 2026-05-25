@@ -47,14 +47,18 @@ src/
 │   ├── model.ts          # Active Claude model name
 │   ├── git.ts            # Branch, dirty status, ahead/behind
 │   ├── context.ts        # Context window % with progress bar
-│   ├── session.ts        # Cost + token counts
+│   ├── session.ts        # Cost + token counts + budget warnings
 │   ├── usage.ts          # Session/weekly usage (stdin rate_limits → OAuth fallback)
+│   ├── ratelimit.ts      # 5-hour usage bar with reset countdown
+│   ├── agent.ts          # Active agent/subagent name
 │   ├── tasks.ts          # Task/todo progress from transcript (completed/total + active)
 │   ├── subagents.ts      # Live running subagents (type, activity, output, elapsed)
-│   ├── diff.ts           # Lines added/removed this session (cost.total_lines_*)
-│   ├── block.ts          # 5-hour block tracking
-│   ├── daily.ts          # Daily aggregate
+│   ├── block.ts          # 5-hour block tracking via transcript
+│   ├── daily.ts          # Daily aggregate with persistent cache
+│   ├── diff.ts           # Lines added/removed in session
 │   ├── metrics.ts        # Message count, duration
+│   ├── sparkline.ts      # Cost-over-time sparkline from transcript
+│   ├── activity.ts       # Current Claude action from transcript
 │   ├── version.ts        # Claude Code version
 │   ├── tmux.ts           # Tmux session name
 │   ├── directory.ts      # CWD with fish-style abbreviation
@@ -80,8 +84,9 @@ src/
     ├── git-ops.ts        # Parallel git commands, 2s timeouts
     ├── format.ts         # Number/duration/cost formatters
     ├── bar.ts            # 5 progress bar styles
+    ├── sparkline.ts      # Unicode sparkline renderer
     ├── path.ts           # Fish-style path abbreviation
-    └── transcript.ts     # JSONL transcript parser
+    └── transcript.ts     # JSONL transcript parser + bucket aggregation
 ```
 
 ## Slash Commands
@@ -136,6 +141,6 @@ Debug with `--debug-stdin` to dump stdin to `~/.cache/claude-norns-statusline/de
 
 model (100) → git (90) → context (80) → session (70) → usage (60)
 
-Disabled by default: diff (53), tasks (52), subagents (51), block, daily, metrics, version, tmux, directory, custom
+Disabled by default: ratelimit (65), agent (55), tasks (52), subagents (51), block (50), daily (45), metrics (40), diff (35), version (30), sparkline (25), tmux (20), activity (15), directory (10), custom (5)
 
 `tasks` and `subagents` read from the session transcript via `transcript_path`. Subagent sidechains live at `<transcript_path without .jsonl>/subagents/agent-*.{meta.json,jsonl}`; a subagent counts as running if its `.jsonl` was touched within 20s. Tasks support both the TaskCreate/TaskUpdate event system and TodoWrite snapshots, hidden after 2 min of no task activity.
